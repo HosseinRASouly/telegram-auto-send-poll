@@ -1,18 +1,21 @@
 const express = require('express');
 const cron = require('node-cron');
-const { sendPoll } = require('./src/common/handler');
-const AuthController = require("./src/common/modules/auth/auth.controller");
-const authController = new AuthController();
+const { sendPoll } = require('./src/common/qustion.sender');
+const initWebhook = require('./src/app.routes');
 
 require('dotenv').config();
 
 const app = express();
 
-// 
+
+// connect to DataBase
+require('./src/config/mongoDB.config')
+
+// middleWares
 app.use(express.json())
 
 // bot AuthController
-authController.initWebhook(app)
+initWebhook.initWebhook(app)
 
 // daylee cron
 cron.schedule("54 17 * * *", () => {

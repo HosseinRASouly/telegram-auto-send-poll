@@ -1,82 +1,62 @@
 const express = require("express");
 const axios = require("axios");
+const { sendAMessage } = require('../../message.sender');
+
+
 const {
   requestPassword,
   checkPassword,
   isAdmin,
   sendResult,
   getUserState,
-} = require("./auth");
+} = require("./auth.service");
 
 class AuthController {
+  sendMessage;
+  state;
+  
   constructor() {
     this.TOKEN = process.env.TOKEN;
+    this.sendMessage = sendAMessage;
+    this.state = getUserState;
   }
 
-  async sendMessage(chatId, text) {
-    try {
-      await axios.post(
-        `https://api.telegram.org/bot${this.TOKEN}/sendMessage`,
-        {
-          chat_id: chatId,
-          text,
-        }
-      );
-    } catch (err) {
-      console.error("Telegram Error:", err.message);
-    }
+  // ----------------------first Message on Bot--------------------------------------------
+  async startMessage(text, userId, chatId) {
+    await this.sendMessage(
+      chatId,
+      "سلام! برای ورود به بخش ادمین /login را بزنید."
+    );
   }
 
-  initWebhook(app) {
-    app.post("/", async (req, res) => {
-      try {
-        const message = req.body.message;
-        if (!message?.text) return res.sendStatus(200);
+  // ------------------------ligin Message on bot------------------------------------------
+  async loginMessage(text, userId, chatId) {
+    const reply = requestPassword(userId);
+    await this.sendMessage(chatId, reply);
+  }
 
-        const chatId = message.chat.id;
-        const userId = message.from.id;
-        const text = message.text;
+  // ------------------------admin password Message on bot------------------------------------------
+  async getPassword(text, userId, chatId) {
+    const result = checkPassword(userId, text);
+    const reply = sendResult(result);
+    await this.sendMessage(chatId, reply);
+  }
 
-        if (text === "/str") {
-          await this.sendMessage(
-            chatId,
-            "سلام! برای ورود به بخش ادمین /login را بزنید."
-          );
-          return res.sendStatus(200);
-        }
+  // ---------------------------admin send a invalid command----------------------------------------------
+  async isAdminInvalidCommand(text, userId, chatId) {
+    await this.sendMessage(
+      chatId,
+      "شما ادمین هستید. دستور نامعتبر است."
+    );
+  }
 
-        if (text === "/login") {
-          const reply = requestPassword(userId);
-          await this.sendMessage(chatId, reply);
-          return res.sendStatus(200);
-        }
-
-        const state = getUserState(userId);
-
-        if (state === "waiting_for_password") {
-          const result = checkPassword(userId, text);
-          const reply = sendResult(result);
-          await this.sendMessage(chatId, reply);
-          return res.sendStatus(200);
-        }
-
-        if (isAdmin(userId)) {
-          await this.sendMessage(
-            chatId,
-            "شما ادمین هستید. دستور نامعتبر است."
-          );
-          return res.sendStatus(200);
-        }
-
-        await this.sendMessage(chatId, "دستور نامعتبر است.");
-        res.sendStatus(200);
-
-      } catch (err) {
-        console.error("Webhook Error:", err);
-        res.sendStatus(200);
-      }
-    });
+  // ---------------------------user send a invalid command----------------------------------------------
+  async isUserInvalidCommand(text, userId, chatId) {
+    await this.sendMessage(
+      chatId,
+      "دستور نامعتبر است."
+    );
   }
 }
 
-module.exports = AuthController;
+module.exports = new AuthController;
