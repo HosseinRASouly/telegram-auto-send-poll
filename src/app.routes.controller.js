@@ -20,8 +20,10 @@ class initWebhook {
               const chatId = message.chat.id;
               const userId = message.from.id;
               const text = message.text;
+              const state = getUserState(userId);
+
       
-              if (text === "/str") {
+              if (text === "/start") {
                 AuthController.startMessage(text, userId, chatId)
                 return res.sendStatus(200);
               }
@@ -30,21 +32,25 @@ class initWebhook {
                 AuthController.loginMessage(text, userId, chatId)
                 return res.sendStatus(200);
               }
-      
-              const state = getUserState(userId);
-      
+            
               if (state === "waiting_for_password") {
                 AuthController.getPassword(text, userId, chatId)
                 return res.sendStatus(200);
               }
+              
             // give question
-    
-      
-              if (isAdmin(userId)) {
-              authController.isAdminInvalidCommand(text, userId, chatId)
+            
+              if (text === "/adminPanel") {
+                if (state === "admin_mode") {
+                  authController.adminPanel(text , userId, chatId);
+                }else {
+                  authController.userNotAdmin(text , userId, chatId);
+                }
+
                 return res.sendStatus(200);
               }
       
+
               authController.isUserInvalidCommand(text, userId, chatId)
               res.sendStatus(200);
       

@@ -12,7 +12,7 @@ class auth {
     
     requestPassword(userId) {
         userStates[userId] = "waiting_for_password";
-        return "لطفاً رمز عبور را وارد کنید: " + JSON.stringify(userStates);
+        return "لطفاً رمز عبور را وارد کنید: ";
       }
 
       checkPassword(userId, password) {
@@ -26,7 +26,7 @@ class auth {
 
     sendResult(result) {
         if (result) {
-          return "رمز درست است. لطفاً سوالات را ارسال کنید.";
+          return "رمز درست است. /adminPanel را وارد کنید.";
         } else {
           return "رمز عبور اشتباه است";
         }

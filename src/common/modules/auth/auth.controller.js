@@ -1,6 +1,6 @@
 const express = require("express");
 const axios = require("axios");
-const { sendAMessage } = require('../../message.sender');
+const { sendAMessage, getKeyboardsBot } = require('../../message.sender');
 
 
 const {
@@ -13,11 +13,13 @@ const {
 
 class AuthController {
   sendMessage;
+  keyboardsOption;
   state;
   
   constructor() {
     this.TOKEN = process.env.TOKEN;
     this.sendMessage = sendAMessage;
+    this.keyboardsOption = getKeyboardsBot;
     this.state = getUserState;
   }
 
@@ -50,11 +52,28 @@ class AuthController {
     );
   }
 
+  // ---------------------------user not Admin---------------------------------------------
+  async userNotAdmin(text, userId, chatId) {
+    await this.sendMessage(
+      chatId,
+      "شما ادمین نیستید از /login استفاده کنید."
+    );
+  }
+
   // ---------------------------user send a invalid command----------------------------------------------
   async isUserInvalidCommand(text, userId, chatId) {
     await this.sendMessage(
       chatId,
       "دستور نامعتبر است."
+    );
+  }
+
+  // ---------------------------give keyboards option----------------------------------------------
+  async adminPanel(text, userId, chatId) {
+    await this.keyboardsOption(chatId);
+
+    await this.sendMessage(
+      chatId
     );
   }
 }

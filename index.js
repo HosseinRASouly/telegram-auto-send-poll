@@ -1,7 +1,7 @@
 const express = require('express');
 const cron = require('node-cron');
 const { sendPoll } = require('./src/common/qustion.sender');
-const initWebhook = require('./src/app.routes');
+const initWebhook = require('./src/app.routes.controller');
 
 require('dotenv').config();
 
